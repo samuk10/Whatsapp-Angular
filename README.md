@@ -24,6 +24,8 @@ npm start
 
 Pronto! Acesse `http://localhost:4200` no navegador e veja a mágica acontecer.
 
+Repo-Back: https://github.com/samuk10/Whatsapp-Dotnet-Backend
+
 ## Projeto feito na Live do _Cristian William Dev_
 
 Fique por dentro de cada detalhe do desenvolvimento. Confira as lives na [playlist do YouTube](https://www.youtube.com/playlist?list=PLMFE0Mu3BVy76T7bZw773jwi329Wl5TMu)
