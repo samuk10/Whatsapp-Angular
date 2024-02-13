@@ -1,8 +1,8 @@
 import { Observable, catchError, of, take, tap } from 'rxjs';
-import { UserService } from './../../../user.service';
+import { UserService } from './../../user.service';
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { User } from '../../../user.model';
+import { User } from '../../user.model';
 import { Router } from '@angular/router';
 
 @Component({
