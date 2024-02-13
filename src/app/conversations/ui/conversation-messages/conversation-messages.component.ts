@@ -8,33 +8,27 @@ import {
   ViewChildren,
   inject,
 } from '@angular/core';
-import { MessageComponent } from '../message/message.component';
 import { FormsModule } from '@angular/forms';
-import { Subject, filter, map, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { Subject, Subscription, filter, map, take, takeUntil } from 'rxjs';
 import { LocalConversationMessage } from '../../../local-db/local-conversation-message.model';
+import { ConversationHubService } from '../../conversation-hub.service';
 import { ConversationService } from '../../conversation.service';
+import { MessageComponent } from '../message/message.component';
 
 @Component({
   selector: 'app-conversation-messages',
   standalone: true,
   imports: [MessageComponent, FormsModule],
   template: `
-    aula 6: a logica parece estar errada. se eu logar com outro user vejo chat
-    BUSCAR AS CONVERSAS NO INDEXDB e falar um com outro
-
     <div class="messages" #scrollPanel>
       @for (message of messages; track $index) {
         <app-message [message]="message" />
       }
-      <app-message
-        *ngFor="let message of messages"
-        [message]="message"></app-message>
     </div>
-
     <input
       type="text"
-      placeholder="Type a message here...."
+      placeholder="Pressione Enter para enviar..."
       [(ngModel)]="inputMessage"
       (keyup.enter)="sendMessage()" />
   `,
@@ -45,12 +39,14 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
   @ViewChild('scrollPanel') scrollPanel!: ElementRef;
 
   private conversationService = inject(ConversationService);
+  private conversationHubService = inject(ConversationHubService);
 
   protected inputMessage = '';
   protected messages: LocalConversationMessage[] = [];
 
   private unsub$ = new Subject<boolean>();
   private conversationUserId = '';
+  private lastSubMessage = new Subscription();
 
   constructor(activatedRoute: ActivatedRoute) {
     activatedRoute.paramMap
@@ -61,9 +57,31 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
       )
       .subscribe(userId => {
         this.conversationUserId = userId || '';
-        this.messages = [];
+        this.loadMessageHistory();
+        this.refreshMessageListener();
       });
   }
+
+  refreshMessageListener() {
+    this.lastSubMessage.unsubscribe();
+
+    this.lastSubMessage = this.conversationHubService
+      .listenMessagesReceived(this.conversationUserId)
+      .subscribe(message => {
+        this.messages.push(message);
+      });
+  }
+
+  private loadMessageHistory() {
+    this.messages = [];
+
+    // Load all messages from current user id conversation
+    this.conversationService
+      .getHistoryMessagesUserId(this.conversationUserId)
+      .pipe(take(1))
+      .subscribe(messages => (this.messages = messages));
+  }
+
   ngAfterViewInit(): void {
     this.messageComps.changes
       .pipe(takeUntil(this.unsub$))
@@ -87,10 +105,12 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
       conversationUserId: this.conversationUserId,
     });
 
-    this.conversationService.publishMessage(
+    this.conversationHubService.publishMessage(
       this.conversationUserId,
       this.inputMessage
     );
+
+    this.inputMessage = '';
   }
 
   ngOnDestroy(): void {

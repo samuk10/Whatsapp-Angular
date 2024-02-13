@@ -97,7 +97,7 @@ export class UserService {
     });
   }
 
-  setCurrentUSer(user: UserStorageInfo) {
+  setCurrentUser(user: UserStorageInfo) {
     this.userInfo.set(user);
   }
 

@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { forkJoin, map, switchMap } from 'rxjs';
 import { LocalDb } from '../local-db/local-db';
 import { Conversation } from './conversation.model';
+import { ConversationHubService } from './conversation-hub.service';
 
 @Injectable({
   providedIn: 'root',
@@ -43,14 +44,5 @@ export class ConversationService {
     return this.localDb.getMessagesHistoryByConversationUserId(
       conversationUserId
     );
-  }
-
-  publishMessage(conversationUserId: string, message: string) {
-    this.localDb.saveMessage({
-      time: new Date(),
-      message: message,
-      mine: true,
-      conversationUserId: conversationUserId,
-    });
   }
 }

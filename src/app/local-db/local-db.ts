@@ -15,7 +15,7 @@ export class LocalDb {
     return this.localDb.table<LocalConversation>('conversations');
   }
 
-  private get conversationMessageTable() {
+  private get conversationMessagesTable() {
     return this.localDb.table<LocalConversationMessage>('conversationMessages');
   }
 
@@ -55,7 +55,7 @@ export class LocalDb {
 
   getMessagesHistoryByConversationUserId(conversationUserId: string) {
     return defer(() =>
-      this.conversationMessageTable
+      this.conversationMessagesTable
         .where('conversationUserId')
         .equalsIgnoreCase(conversationUserId)
         .toArray()
@@ -63,6 +63,6 @@ export class LocalDb {
   }
 
   saveMessage(message: LocalConversationMessage) {
-    return from(this.conversationMessageTable.add(message));
+    return from(this.conversationMessagesTable.add(message));
   }
 }
